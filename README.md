@@ -1,13 +1,13 @@
-# portainer-mcp-server
+# clr-portainer-mcp
 
 Portainer container/stack management
 
 ## Install
 
 ```bash
-pip install portainer-mcp-server
+pip install clr-portainer-mcp
 # or
-uvx portainer-mcp-server
+uvx clr-portainer-mcp
 ```
 
 ## Configuration
@@ -37,16 +37,16 @@ uvx portainer-mcp-server
 See `--help` for additional options:
 
 ```bash
-portainer-mcp-server --help
+clr-portainer-mcp --help
 ```
 
 ## Development
 
 ```bash
-git clone https://github.com/clearminds/portainer-mcp-server.git
-cd portainer-mcp-server
+git clone https://github.com/clearminds/clr-portainer-mcp.git
+cd clr-portainer-mcp
 uv sync
-uv run portainer-mcp-server
+uv run clr-portainer-mcp
 ```
 
 ## License

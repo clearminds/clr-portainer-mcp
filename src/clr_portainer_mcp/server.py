@@ -8,8 +8,8 @@ from typing import Any
 
 from fastmcp import FastMCP
 
-from portainer_mcp_server.config import Settings
-from portainer_mcp_server.portainer_client import PortainerClient
+from clr_portainer_mcp.config import Settings
+from clr_portainer_mcp.portainer_client import PortainerClient
 
 mcp = FastMCP("Portainer")
 _client: PortainerClient | None = None

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "portainer-mcp-server"
+name = "clr-portainer-mcp"
 version = "1.0.0"
 description = "MCP server for Portainer container management"
 requires-python = ">=3.11"
@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/clearminds/portainer-mcp-server"
+Repository = "https://github.com/clearminds/clr-portainer-mcp"
 
 [project.scripts]
-portainer-mcp-server = "portainer_mcp_server.server:main"
+clr-portainer-mcp = "clr_portainer_mcp.server:main"
