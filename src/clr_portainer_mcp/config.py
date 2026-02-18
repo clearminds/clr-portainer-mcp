@@ -13,11 +13,11 @@ CREDS_PATH = Path.home() / ".config" / "portainer" / "credentials.json"
 
 
 class Settings(BaseSettings):
-    """Settings loaded from environment variables or credentials file.
+    """Settings loaded from credentials file or environment variables.
 
     Priority order:
-    1. Environment variables (PORTAINER_URL, PORTAINER_API_KEY)
-    2. ~/.config/portainer/credentials.json
+    1. ~/.config/portainer/credentials.json
+    2. Environment variables (PORTAINER_URL, PORTAINER_API_KEY) - override
     """
 
     portainer_url: str = ""
@@ -29,14 +29,14 @@ class Settings(BaseSettings):
     model_config = {"env_prefix": ""}
 
     def load_credentials(self) -> dict[str, Any]:
-        """Load credentials with env-first, config-file-fallback pattern.
+        """Load credentials with config-file-first, env-override pattern.
 
         Returns:
             Dict with url, api_key, and optional default_endpoint.
         """
         creds: dict[str, Any] = {}
 
-        # 1. FIRST: Check environment variables
+        # 1. FIRST: Load from environment variables (base/fallback)
         if self.portainer_url:
             creds["url"] = self.portainer_url
         if self.portainer_api_key:
@@ -44,24 +44,18 @@ class Settings(BaseSettings):
         if self.portainer_default_endpoint:
             creds["default_endpoint"] = self.portainer_default_endpoint
 
-        # If we have all required creds from env, return early
-        if creds.get("url") and creds.get("api_key"):
-            logger.info("Using Portainer credentials from environment variables")
-            return creds
-
-        # 2. FALLBACK: Check credentials.json file
+        # 2. THEN: Override with credentials.json file (takes priority)
         if CREDS_PATH.exists():
             try:
                 file_creds: dict[str, Any] = json.loads(CREDS_PATH.read_text())
 
-                # Only use file values if NOT already set by env vars
-                if "url" in file_creds and not creds.get("url"):
+                if "url" in file_creds:
                     creds["url"] = file_creds["url"]
-                if "api_key" in file_creds and not creds.get("api_key"):
+                if "api_key" in file_creds:
                     creds["api_key"] = file_creds["api_key"]
-                if "token" in file_creds and not creds.get("api_key"):  # Legacy support
+                elif "token" in file_creds:  # Legacy support
                     creds["api_key"] = file_creds["token"]
-                if "default_endpoint" in file_creds and not creds.get("default_endpoint"):
+                if "default_endpoint" in file_creds:
                     creds["default_endpoint"] = file_creds["default_endpoint"]
 
                 logger.info(f"Loaded Portainer credentials from {CREDS_PATH}")
