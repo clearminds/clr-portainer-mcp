@@ -259,8 +259,6 @@ def main() -> None:
 
     transport = args.transport or settings.portainer_transport
     log_level = args.log_level or settings.portainer_log_level
-    url = args.portainer_url or settings.portainer_url
-    api_key = args.portainer_api_key or settings.portainer_api_key
 
     logging.config.dictConfig(
         {
@@ -284,12 +282,17 @@ def main() -> None:
 
     logger = logging.getLogger(__name__)
 
+    creds = settings.load_credentials()
+    url = args.portainer_url or creds.get("url", "")
+    api_key = args.portainer_api_key or creds.get("api_key", "")
+    default_endpoint = creds.get("default_endpoint", 1)
+
     if not api_key:
         logger.error("PORTAINER_API_KEY is required")
         sys.exit(1)
 
     logger.info("Starting Portainer MCP Server (%s)", url)
-    _client = PortainerClient(url, api_key, settings.portainer_default_endpoint)
+    _client = PortainerClient(url, api_key, default_endpoint)
 
     try:
         if transport == "stdio":
