@@ -9,7 +9,17 @@ logger = logging.getLogger(__name__)
 
 
 class PortainerClient:
-    """Portainer REST API client with API-key auth."""
+    """Portainer REST API client with API-key auth.
+
+    Args:
+        base_url: The Portainer instance base URL (trailing slash is stripped).
+        api_key: API key used in the ``X-API-Key`` header.
+        default_endpoint: Default Docker endpoint ID used when none is specified.
+
+    Attributes:
+        base_url: The normalised Portainer base URL.
+        default_endpoint: Default Docker endpoint ID.
+    """
 
     def __init__(self, base_url: str, api_key: str, default_endpoint: int = 4) -> None:
         self.base_url = base_url.rstrip("/")
@@ -24,28 +34,71 @@ class PortainerClient:
         )
 
     def close(self) -> None:
+        """Close the underlying HTTP client."""
         self._http.close()
 
     def get(self, path: str) -> Any:
-        """GET request. Returns parsed JSON."""
+        """Send a GET request and return parsed JSON.
+
+        Args:
+            path: API path relative to ``/api``.
+
+        Returns:
+            Parsed JSON response body.
+
+        Raises:
+            httpx.HTTPStatusError: If the response status indicates an error.
+        """
         resp = self._http.get(path)
         resp.raise_for_status()
         return resp.json()
 
     def get_raw(self, path: str) -> str:
-        """GET request returning raw text (for logs)."""
+        """Send a GET request and return the raw response text.
+
+        Args:
+            path: API path relative to ``/api``.
+
+        Returns:
+            Raw response body as a string.
+
+        Raises:
+            httpx.HTTPStatusError: If the response status indicates an error.
+        """
         resp = self._http.get(path)
         resp.raise_for_status()
         return resp.text
 
     def post(self, path: str, data: Any = None) -> int:
-        """POST request. Returns status code."""
+        """Send a POST request and return the HTTP status code.
+
+        Args:
+            path: API path relative to ``/api``.
+            data: JSON-serialisable payload (defaults to empty dict).
+
+        Returns:
+            HTTP status code of the response.
+
+        Raises:
+            httpx.HTTPStatusError: If the response status indicates an error.
+        """
         resp = self._http.post(path, json=data or {})
         resp.raise_for_status()
         return resp.status_code
 
     def put(self, path: str, data: Any = None) -> Any:
-        """PUT request. Returns parsed JSON."""
+        """Send a PUT request and return parsed JSON.
+
+        Args:
+            path: API path relative to ``/api``.
+            data: JSON-serialisable payload.
+
+        Returns:
+            Parsed JSON response body.
+
+        Raises:
+            httpx.HTTPStatusError: If the response status indicates an error.
+        """
         resp = self._http.put(path, json=data)
         resp.raise_for_status()
         return resp.json()

@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     Priority order:
     1. ~/.config/portainer/credentials.json
     2. Environment variables (PORTAINER_URL, PORTAINER_API_KEY) - override
+
+    Attributes:
+        portainer_url: The Portainer instance base URL.
+        portainer_api_key: API key for Portainer authentication.
+        portainer_default_endpoint: Default Docker endpoint ID.
+        portainer_transport: MCP transport type (``stdio`` or ``http``).
+        portainer_log_level: Logging level name.
     """
 
     portainer_url: str = ""
