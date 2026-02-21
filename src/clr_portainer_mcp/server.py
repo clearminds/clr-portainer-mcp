@@ -14,6 +14,8 @@ from clr_portainer_mcp.portainer_client import PortainerClient
 mcp = FastMCP("Portainer")
 _client: PortainerClient | None = None
 
+WRITE_TOOLS = ["portainer_start", "portainer_stop", "portainer_restart", "portainer_redeploy"]
+
 
 # ── Status tools ─────────────────────────────────────────────────────
 
@@ -255,6 +257,12 @@ def main() -> None:
     )
     parser.add_argument("--portainer-url", type=str, default=None)
     parser.add_argument("--portainer-api-key", type=str, default=None)
+    parser.add_argument(
+        "--read-only",
+        action="store_true",
+        default=None,
+        help="Run in read-only mode (hide write tools)",
+    )
     args = parser.parse_args()
 
     transport = args.transport or settings.portainer_transport
@@ -293,6 +301,12 @@ def main() -> None:
 
     logger.info("Starting Portainer MCP Server (%s)", url)
     _client = PortainerClient(url, api_key, default_endpoint)
+
+    read_only = args.read_only if args.read_only is not None else settings.portainer_read_only
+    if read_only and WRITE_TOOLS:
+        for name in WRITE_TOOLS:
+            mcp.remove_tool(name)
+        logger.info("Read-only mode: %d write tools removed", len(WRITE_TOOLS))
 
     try:
         if transport == "stdio":

@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     portainer_default_endpoint: int = 1
     portainer_transport: str = "stdio"
     portainer_log_level: str = "INFO"
+    portainer_read_only: bool = False
 
     model_config = {"env_prefix": ""}
 
