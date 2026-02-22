@@ -10,8 +10,10 @@ from fastmcp import FastMCP
 
 from clr_portainer_mcp.config import Settings
 from clr_portainer_mcp.portainer_client import PortainerClient
+from clr_portainer_mcp.middleware import ToolValidationMiddleware
 
 mcp = FastMCP("Portainer")
+mcp.add_middleware(ToolValidationMiddleware())
 _client: PortainerClient | None = None
 
 WRITE_TOOLS = ["portainer_start", "portainer_stop", "portainer_restart", "portainer_redeploy"]
