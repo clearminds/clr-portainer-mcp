@@ -34,6 +34,14 @@ uvx clr-portainer-mcp
 | `PORTAINER_USERNAME` | Username (if not using token) | `admin` |
 | `PORTAINER_PASSWORD` | Password (if not using token) | `your-password` |
 
+Optional:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORTAINER_READ_ONLY` | Run in read-only mode | `false` |
+| `PORTAINER_TRANSPORT` | Transport protocol (`stdio` or `http`) | `stdio` |
+| `PORTAINER_LOG_LEVEL` | Log level | `INFO` |
+
 See `--help` for additional options:
 
 ```bash
