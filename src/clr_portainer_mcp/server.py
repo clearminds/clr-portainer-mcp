@@ -236,6 +236,29 @@ def portainer_redeploy(stack_id: int) -> str:
     return f"Stack '{name}' redeployed successfully"
 
 
+# ── Composite init ───────────────────────────────────────────────────
+
+
+def init_composite() -> FastMCP:
+    """Initialize for composite mounting. Returns the FastMCP instance."""
+    global _client
+
+    settings = Settings()
+    creds = settings.load_credentials()
+
+    url = creds.get("url", "")
+    api_key = creds.get("api_key", "")
+    default_endpoint = creds.get("default_endpoint", 1)
+
+    _client = PortainerClient(url, api_key, default_endpoint)
+
+    if settings.portainer_read_only and WRITE_TOOLS:
+        for name in WRITE_TOOLS:
+            mcp.remove_tool(name)
+
+    return mcp
+
+
 # ── Main entry point ─────────────────────────────────────────────────
 
 
