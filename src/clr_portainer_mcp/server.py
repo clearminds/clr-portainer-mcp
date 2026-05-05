@@ -16,13 +16,16 @@ mcp = FastMCP("Portainer")
 mcp.add_middleware(ToolValidationMiddleware())
 _client: PortainerClient | None = None
 
-WRITE_TOOLS = ["portainer_start", "portainer_stop", "portainer_restart", "portainer_redeploy"]
+# Imported here (not at the top) on purpose: annotations.py needs ``mcp`` from
+# this module, so importing it before the ``mcp = FastMCP(...)`` line above
+# would be a circular import. Do not move.
+from clr_portainer_mcp.annotations import read_tool, remove_non_read_tools, write_tool  # noqa: E402
 
 
 # ── Status tools ─────────────────────────────────────────────────────
 
 
-@mcp.tool
+@read_tool
 def portainer_status() -> dict[str, Any]:
     """Get Portainer server version and status.
 
@@ -31,7 +34,7 @@ def portainer_status() -> dict[str, Any]:
     return _client.get("/status")
 
 
-@mcp.tool
+@read_tool
 def portainer_endpoints() -> list[dict[str, Any]]:
     """List all Docker environments (endpoints).
 
@@ -53,7 +56,7 @@ def portainer_endpoints() -> list[dict[str, Any]]:
 # ── Container tools ──────────────────────────────────────────────────
 
 
-@mcp.tool
+@read_tool
 def portainer_containers(endpoint: int | None = None) -> list[dict[str, Any]]:
     """List all containers on an endpoint.
 
@@ -76,7 +79,7 @@ def portainer_containers(endpoint: int | None = None) -> list[dict[str, Any]]:
     ]
 
 
-@mcp.tool
+@read_tool
 def portainer_logs(
     container: str,
     endpoint: int | None = None,
@@ -107,7 +110,7 @@ def portainer_logs(
     return "\n".join(lines)
 
 
-@mcp.tool
+@write_tool
 def portainer_start(container: str, endpoint: int | None = None) -> str:
     """Start a stopped container.
 
@@ -123,7 +126,7 @@ def portainer_start(container: str, endpoint: int | None = None) -> str:
     return f"Container '{container}' started"
 
 
-@mcp.tool
+@write_tool
 def portainer_stop(container: str, endpoint: int | None = None) -> str:
     """Stop a running container.
 
@@ -139,7 +142,7 @@ def portainer_stop(container: str, endpoint: int | None = None) -> str:
     return f"Container '{container}' stopped"
 
 
-@mcp.tool
+@write_tool
 def portainer_restart(container: str, endpoint: int | None = None) -> str:
     """Restart a container.
 
@@ -158,7 +161,7 @@ def portainer_restart(container: str, endpoint: int | None = None) -> str:
 # ── Stack tools ──────────────────────────────────────────────────────
 
 
-@mcp.tool
+@read_tool
 def portainer_stacks() -> list[dict[str, Any]]:
     """List all stacks.
 
@@ -177,7 +180,7 @@ def portainer_stacks() -> list[dict[str, Any]]:
     ]
 
 
-@mcp.tool
+@read_tool
 def portainer_stack_info(stack_id: int) -> dict[str, Any]:
     """Get detailed info for a specific stack.
 
@@ -200,7 +203,7 @@ def portainer_stack_info(stack_id: int) -> dict[str, Any]:
     }
 
 
-@mcp.tool
+@write_tool
 def portainer_redeploy(stack_id: int) -> str:
     """Pull latest from git and redeploy a stack.
 
@@ -328,10 +331,9 @@ def main() -> None:
     _client = PortainerClient(url, api_key, default_endpoint)
 
     read_only = args.read_only if args.read_only is not None else settings.portainer_read_only
-    if read_only and WRITE_TOOLS:
-        for name in WRITE_TOOLS:
-            mcp.remove_tool(name)
-        logger.info("Read-only mode: %d write tools removed", len(WRITE_TOOLS))
+    if read_only:
+        removed = remove_non_read_tools(mcp)
+        logger.info("Read-only mode: %d non-read tools removed", removed)
 
     try:
         if transport == "stdio":
