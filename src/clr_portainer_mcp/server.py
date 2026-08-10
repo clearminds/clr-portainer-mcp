@@ -221,11 +221,34 @@ def portainer_redeploy(stack_id: int) -> str:
     git_config = stack.get("GitConfig") or {}
     git_auth = git_config.get("Authentication") or {}
     git_cred_id = git_auth.get("GitCredentialID", 0)
+    ref_name = git_config.get("ReferenceName") or ""
+
+    name = stack.get("Name", f"stack {stack_id}")
+    if not git_config:
+        return (
+            f"Refusing to redeploy '{name}': it is not a git-based stack. "
+            "This endpoint would need a file-based update instead."
+        )
+    if not ref_name:
+        return (
+            f"Refusing to redeploy '{name}': its GitConfig has no ReferenceName. "
+            "Redeploying would leave it blank and keep git-based deploys (including CI) "
+            "broken. Set the branch/tag on the stack first, e.g. PUT "
+            f"/stacks/{stack_id}/git/redeploy with repositoryReferenceName."
+        )
 
     payload = {
         "env": env_vars,
         "prune": False,
         "pullImage": True,
+        # MUST be echoed back. Portainer overwrites the stack's stored
+        # ReferenceName with whatever this field holds, so omitting it silently
+        # blanks the git ref. The stack keeps running and still reports a
+        # GitConfig (URL and auth survive), which is why nothing looks wrong --
+        # but every later git-based deploy fails with "Stack N is not a
+        # git-based stack". That took out CI deploys for nodus-staging on
+        # 2026-08-10; the ref had to be restored by hand.
+        "repositoryReferenceName": ref_name,
         "repositoryAuthentication": True,
         "repositoryGitCredentialID": git_cred_id,
     }
@@ -235,8 +258,15 @@ def portainer_redeploy(stack_id: int) -> str:
         payload,
     )
 
-    name = result.get("Name", f"stack {stack_id}")
-    return f"Stack '{name}' redeployed successfully"
+    name = result.get("Name", name)
+    kept = ((result.get("GitConfig") or {}).get("ReferenceName")) or ""
+    if kept != ref_name:
+        return (
+            f"Stack '{name}' redeployed, but its git ReferenceName changed from "
+            f"{ref_name!r} to {kept!r} -- git-based deploys will fail until this is "
+            "restored."
+        )
+    return f"Stack '{name}' redeployed successfully (ref {ref_name})"
 
 
 # ── Main entry point ─────────────────────────────────────────────────
