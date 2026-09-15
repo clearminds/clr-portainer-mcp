@@ -26,7 +26,7 @@ from clr_portainer_mcp.annotations import read_tool, remove_non_read_tools, writ
 
 
 @read_tool
-def portainer_status() -> dict[str, Any]:
+def status() -> dict[str, Any]:
     """Get Portainer server version and status.
 
     Returns server version and instance info.
@@ -35,7 +35,7 @@ def portainer_status() -> dict[str, Any]:
 
 
 @read_tool
-def portainer_endpoints() -> list[dict[str, Any]]:
+def endpoints() -> list[dict[str, Any]]:
     """List all Docker environments (endpoints).
 
     Returns list of endpoints with id, name, type (local/remote), and status.
@@ -57,7 +57,7 @@ def portainer_endpoints() -> list[dict[str, Any]]:
 
 
 @read_tool
-def portainer_containers(endpoint: int | None = None) -> list[dict[str, Any]]:
+def containers(endpoint: int | None = None) -> list[dict[str, Any]]:
     """List all containers on an endpoint.
 
     Args:
@@ -80,7 +80,7 @@ def portainer_containers(endpoint: int | None = None) -> list[dict[str, Any]]:
 
 
 @read_tool
-def portainer_logs(
+def logs(
     container: str,
     endpoint: int | None = None,
     tail: int = 100,
@@ -111,7 +111,7 @@ def portainer_logs(
 
 
 @write_tool
-def portainer_start(container: str, endpoint: int | None = None) -> str:
+def start(container: str, endpoint: int | None = None) -> str:
     """Start a stopped container.
 
     Args:
@@ -127,7 +127,7 @@ def portainer_start(container: str, endpoint: int | None = None) -> str:
 
 
 @write_tool
-def portainer_stop(container: str, endpoint: int | None = None) -> str:
+def stop(container: str, endpoint: int | None = None) -> str:
     """Stop a running container.
 
     Args:
@@ -143,7 +143,7 @@ def portainer_stop(container: str, endpoint: int | None = None) -> str:
 
 
 @write_tool
-def portainer_restart(container: str, endpoint: int | None = None) -> str:
+def restart(container: str, endpoint: int | None = None) -> str:
     """Restart a container.
 
     Args:
@@ -162,7 +162,7 @@ def portainer_restart(container: str, endpoint: int | None = None) -> str:
 
 
 @read_tool
-def portainer_stacks() -> list[dict[str, Any]]:
+def stacks() -> list[dict[str, Any]]:
     """List all stacks.
 
     Returns list of stacks with id, name, status, endpoint, and type.
@@ -181,7 +181,7 @@ def portainer_stacks() -> list[dict[str, Any]]:
 
 
 @read_tool
-def portainer_stack_info(stack_id: int) -> dict[str, Any]:
+def stack_info(stack_id: int) -> dict[str, Any]:
     """Get detailed info for a specific stack.
 
     Args:
@@ -204,7 +204,7 @@ def portainer_stack_info(stack_id: int) -> dict[str, Any]:
 
 
 @write_tool
-def portainer_redeploy(stack_id: int) -> str:
+def redeploy(stack_id: int) -> str:
     """Pull latest from git and redeploy a stack.
 
     Fetches current stack config (env vars, git credentials) and triggers
